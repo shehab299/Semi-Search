@@ -1,12 +1,25 @@
 from typing import Dict, List, Annotated
 import numpy as np
 import os
+from abc import ABC, abstractmethod
 
 DB_SEED_NUMBER = 42
 ELEMENT_SIZE = np.dtype(np.float32).itemsize
 DIMENSION = 70
 
-class VecDB:
+class IDB(ABC):
+
+    @abstractmethod
+    def __init__(self, database_file_path, index_file_path, new_db, db_size) -> None:
+        pass
+
+    @abstractmethod
+    def retrieve(self, query: Annotated[np.ndarray, (1, DIMENSION)], top_k = 5):
+        pass
+
+
+class VecDB(IDB):
+    
     def __init__(self, database_file_path = "saved_db.dat", index_file_path = "index.dat", new_db = True, db_size = None) -> None:
         self.db_path = database_file_path
         self.index_path = index_file_path

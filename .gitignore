@@ -1,0 +1,121 @@
+# Python bytecode / cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+dist/
+wheels/
+*.egg-info/
+.eggs/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+.pyenv/
+pip-wheel-metadata/
+pip-log.txt
+
+# Installer logs
+pip-delete-this-directory.txt
+
+# Unit test / coverage
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.pytest_cache/
+.cache/
+pytestdebug.log
+coverage.xml
+
+# Type check / lint caches
+.mypy_cache/
+.dmypy.json
+.pyre/
+.pytype/
+ruff_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*.ipynb_convert/
+
+# Django / Flask / etc.
+*.log
+local_settings.py
+instance/
+db.sqlite3
+db.sqlite3-journal
+
+# PyBuilder
+target/
+
+# C extensions
+*.so
+*.pyd
+*.dll
+
+# Compiled translations
+*.mo
+
+# Environments / secrets
+.env
+.env.*
+*.env
+*.secret
+secrets.json
+
+# IDE / Editor
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.iml
+
+# VSCode local history
+.history/
+.localhistory/
+
+# Mac / Linux / Windows
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Logs / dumps
+*.stackdump
+*.log
+logs/
+*.tmp
+tmp/
+
+# Coverage tools
+lcov.info
+
+# Build artifacts
+*.bak
+*.orig
+
+# Lock files (optional)
+Pipfile.lock
+poetry.lock
+poetry.toml
+
+# Cache
+__pypackages__/
+*.cache
+*.egg-info/
+.sphinx/
+docs/_build/
+
+# Other
+.mr.developer.cfg
+.project
+.pydevproject
