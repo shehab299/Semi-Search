@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.bat
 
 # Distribution / packaging
 build/
@@ -119,3 +120,4 @@ docs/_build/
 .mr.developer.cfg
 .project
 .pydevproject
+
