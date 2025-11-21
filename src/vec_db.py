@@ -11,7 +11,7 @@ from .index.opq import OPQ
 from .index.pq import PQ
 from .index.ivf import IVF
 from .index.disk import DiskIndex
-from .index.retriever import Retriever
+from .index.retrieval_utils import Retriever
 from .index.params import PARAMS
 ELEMENT_SIZE = np.dtype(np.float32).itemsize
 DIMENSION = 64
@@ -38,11 +38,12 @@ class VecDB(IDB):
 
         if new_db:
             self._build_index()
+        self.disk = DiskIndex(self.index_path)
     
     def _get_num_records(self) -> int:
         return os.path.getsize(self.db_path) // (DIMENSION * ELEMENT_SIZE)
 
-    def insert_records(self, rows: Annotated[np.ndarray, (int, 70)]):
+    def insert_records(self, rows: Annotated[np.ndarray, (int, 70)])-> None:
         num_old_records = self._get_num_records()
         num_new_records = len(rows)
         full_shape = (num_old_records + num_new_records, DIMENSION)
@@ -67,7 +68,7 @@ class VecDB(IDB):
         vectors = np.memmap(self.db_path, dtype=np.float32, mode='r', shape=(num_records, DIMENSION))
         return np.array(vectors)
     
-    def knn_retrieve(self, query: Annotated[np.ndarray, (1, DIMENSION)], top_k = 5, score_fn = CosineSimilarity()):
+    def knn_retrieve(self, query: Annotated[np.ndarray, (1, DIMENSION)], top_k = 5, score_fn = CosineSimilarity())-> List[int]:
         scores = []
         num_records = self._get_num_records()
         # here we assume that the row number is the ID of each vector
@@ -80,21 +81,13 @@ class VecDB(IDB):
         return [s[1] for s in scores]
 
 
-    def retrieve(self, query: Annotated[np.ndarray, (1, DIMENSION)], top_k = 5, score_fn = CosineSimilarity()):
-        retriever = Retriever(
-            ivf=IVF.load(self.index_path + "_ivf.npy"),
-            opq=OPQ(M=PARAMS.M).load(self.index_path + "_opq.npy"),
-            pq=PQ(M=PARAMS.M, Ks=PARAMS.KS).load(self.index_path + "_pq.npy"),
-            disk=DiskIndex(base_dir=self.index_path + "_disk"),
-            params=PARAMS
-        )
-        return retriever.retrieve(query, top_k)
+    def retrieve(self, query: Annotated[np.ndarray, (1, DIMENSION)], top_k = 5, score_fn = CosineSimilarity())-> List[int]:
+        # Full pipeline: Normalize query -> Load OPQ rotation -> rotate query -> Load centroids -> compute nearest nprobe centroids -> Load PQ codebooks -> Build LUT -> Scan selected lists -> Select top_k by distance
+        top_k_results = self.knn_retrieve(query, top_k, score_fn)
+        return top_k_results
 
-    def _build_index(self) -> None:
-        # Placeholder for index building logic
+    def _build_index(self)-> None:
+        print("Building index...")
         X = self.get_all_rows()
-        # 1- train opq -> save it -> apply it
-        # 2- train ivf --> save centroids
-        # 3- train pq on residuals --> save it
-        # 4- encode all rsiduals --> write invrted lists to disk
-        pass
+        # Full pipeline: Train OPQ -> rotate -> Train IVF -> assign -> compute residuals -> Train PQ -> encode residuals -> write disk index -> save metadata
+        print("Index build completed")

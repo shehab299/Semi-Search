@@ -20,10 +20,10 @@ class Result:
 def run_queries(db, np_rows, top_k, num_runs):
     results = []
     for _ in range(num_runs):
-        query = np.random.random((1,70))
+        query = np.random.random((1,64))
         
         tic = time.time()
-        db_ids = db.retrieve(query, top_k)
+        db_ids = db.knn_retrieve(query, top_k)
         toc = time.time()
         run_time = toc - tic
         

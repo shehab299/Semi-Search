@@ -20,7 +20,7 @@ class PQ:
 
     def decode(self, codes: np.ndarray) -> np.ndarray:
         reconstructed_codes = np.zeros((codes.shape[0], self.M * (self.codebooks.shape[2])))
-        # TODO: Use codebooks to reconstruct vectors (for optional reranking)
+        # TODO: iterate over subquantizer and extracting code indeices and get the correspoding centrods from codebooks and concatenate them
         return reconstructed_codes
 
     def save(self, path: str):

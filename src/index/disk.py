@@ -4,13 +4,26 @@ class DiskIndex:
     def __init__(self, base_dir: str):
         self.base_dir = base_dir
 
-    def write(self, cluster_ids: list, pq_codes: np.ndarray, M: int):
-        """
-            - Write invlists.bin as raw bytes
-            - Write offsets.npy
-            - Write ids.bin with vector IDs
-        """
-        pass
+    def write(self, clusters: list[list[int]], pq_codes: np.ndarray, M: int):
+        inv_path = f"{self.base_dir}/invlists.bin"
+        ids_path = f"{self.base_dir}/ids.bin"
+        offsets_path = f"{self.base_dir}/offsets.npy"
+
+        with open(inv_path, "wb") as finv, open(ids_path, "wb") as fids:
+            offsets = []
+            offset = 0
+
+            for cidx, members in enumerate(clusters):
+                offsets.append(offset)
+
+                for vid in members:
+                    finv.write(bytes(pq_codes[vid].tolist()))
+                    fids.write(np.int32(vid).tobytes())
+
+                    offset += M  
+                    
+        np.save(offsets_path, np.array(offsets, dtype=np.int64))
+
 
     def read_invlists(self):
         invlists = np.memmap(f"{self.base_dir}/invlists.bin", dtype=np.uint8, mode='r')
