@@ -21,7 +21,3 @@ class DatabaseGenerator:
         mmap_vectors = np.memmap(filename=self.db_file_path, dtype=np.float32, mode='w+', shape=vectors.shape)
         mmap_vectors[:] = vectors[:]
         mmap_vectors.flush()
-
-
-
-

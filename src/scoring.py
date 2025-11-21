@@ -21,3 +21,7 @@ class CosineSimilarity(ScoringFunction):
         cosine_similarity = dot_product / (norm_vec1 * norm_vec2)
         return cosine_similarity
 
+class L2Distance(ScoringFunction):
+
+    def __call__(self, vec1: np.ndarray, vec2: np.ndarray) -> float:
+        return np.sum((vec1 - vec2)**2)

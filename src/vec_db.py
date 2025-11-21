@@ -6,8 +6,15 @@ import sys
 ######## Third-Party Modules #######
 import numpy as np
 ######## Project Modules #######
-from .config import DIMENSION, ELEMENT_SIZE
 from .scoring import CosineSimilarity
+from .index.opq import OPQ
+from .index.pq import PQ
+from .index.ivf import IVF
+from .index.disk import DiskIndex
+from .index.retriever import Retriever
+from .index.params import PARAMS
+ELEMENT_SIZE = np.dtype(np.float32).itemsize
+DIMENSION = 64
 ########################################
 
 class IDB(ABC):
@@ -25,6 +32,12 @@ class VecDB(IDB):
     def __init__(self, database_file_path = "saved_db.dat", index_file_path = "index.dat", new_db = True, db_size = None) -> None:
         self.db_path = database_file_path
         self.index_path = index_file_path
+        if new_db and db_size is not None:
+            empty = np.memmap(self.db_path, dtype=np.float32, mode='w+', shape=(db_size, DIMENSION))
+            empty.flush()
+
+        if new_db:
+            self._build_index()
     
     def _get_num_records(self) -> int:
         return os.path.getsize(self.db_path) // (DIMENSION * ELEMENT_SIZE)
@@ -54,7 +67,7 @@ class VecDB(IDB):
         vectors = np.memmap(self.db_path, dtype=np.float32, mode='r', shape=(num_records, DIMENSION))
         return np.array(vectors)
     
-    def retrieve(self, query: Annotated[np.ndarray, (1, DIMENSION)], top_k = 5, score_fn = CosineSimilarity()):
+    def knn_retrieve(self, query: Annotated[np.ndarray, (1, DIMENSION)], top_k = 5, score_fn = CosineSimilarity()):
         scores = []
         num_records = self._get_num_records()
         # here we assume that the row number is the ID of each vector
@@ -65,9 +78,23 @@ class VecDB(IDB):
         # here we assume that if two rows have the same score, return the lowest ID
         scores = sorted(scores, reverse=True)[:top_k]
         return [s[1] for s in scores]
-    
+
+
+    def retrieve(self, query: Annotated[np.ndarray, (1, DIMENSION)], top_k = 5, score_fn = CosineSimilarity()):
+        retriever = Retriever(
+            ivf=IVF.load(self.index_path + "_ivf.npy"),
+            opq=OPQ(M=PARAMS.M).load(self.index_path + "_opq.npy"),
+            pq=PQ(M=PARAMS.M, Ks=PARAMS.KS).load(self.index_path + "_pq.npy"),
+            disk=DiskIndex(base_dir=self.index_path + "_disk"),
+            params=PARAMS
+        )
+        return retriever.retrieve(query, top_k)
+
     def _build_index(self) -> None:
         # Placeholder for index building logic
+        X = self.get_all_rows()
+        # 1- train opq -> save it -> apply it
+        # 2- train ivf --> save centroids
+        # 3- train pq on residuals --> save it
+        # 4- encode all rsiduals --> write invrted lists to disk
         pass
-
-

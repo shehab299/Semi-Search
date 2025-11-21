@@ -1,6 +1,11 @@
 # This snippet of code is to show you a simple evaluate for VecDB class, but the full evaluation for project on the Notebook shared with you.
+# Ensure project root is on sys.path so `src` package can be imported when run as a script.
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import numpy as np
-from vec_db import VecDB
+from src.vec_db import VecDB
 import time
 from dataclasses import dataclass
 from typing import List

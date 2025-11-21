@@ -4,6 +4,11 @@ __pycache__/
 *$py.class
 *.bat
 
+# Data
+# data/word
+en.txt.gz
+OpenSubtitles_en_*
+
 # Distribution / packaging
 build/
 dist/
