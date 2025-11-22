@@ -13,14 +13,13 @@ class DiskIndex:
             offsets = []
             offset = 0
 
-            for cidx, members in enumerate(clusters):
+            for vectors in clusters:
                 offsets.append(offset)
 
-                for vid in members:
+                for vid in vectors:
                     finv.write(bytes(pq_codes[vid].tolist()))
                     fids.write(np.int32(vid).tobytes())
-
-                    offset += M  
+                    offset += M
                     
         np.save(offsets_path, np.array(offsets, dtype=np.int64))
 
